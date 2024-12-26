@@ -50,7 +50,14 @@ namespace CookingApp.Services
 
         public void UpdateRecipe(string customId, Recipe updatedRecipe)
         {
-            var result = _recipes.ReplaceOne(recipe => recipe.CustomId == customId, updatedRecipe);
+            var recipe = _recipes.Find(r => r.CustomId == customId).FirstOrDefault();
+            if (recipe == null)
+            {
+                Console.WriteLine("Receptet med angivet ID finns inte.");
+                return;
+            }
+
+            var result = _recipes.ReplaceOne(r => r.CustomId == customId, updatedRecipe);
             if (result.ModifiedCount == 0)
             {
                 throw new Exception("Receptet kunde inte uppdateras.");
@@ -59,11 +66,15 @@ namespace CookingApp.Services
 
         public void DeleteRecipe(string customId)
         {
-            var result = _recipes.DeleteOne(recipe => recipe.CustomId == customId);
-            if (result.DeletedCount == 0)
+            var recipe = _recipes.Find(r => r.CustomId == customId).FirstOrDefault();
+            if (recipe == null)
             {
-                throw new Exception("Receptet kunde inte tas bort.");
+                Console.WriteLine("Receptet med angivet ID finns inte.");
+                return;
             }
+
+            _recipes.DeleteOne(r => r.CustomId == customId);
+            Console.WriteLine("Receptet har tagits bort.");
         }
 
         public void AddRatingToRecipe(string customId, int rating)
@@ -95,21 +106,3 @@ namespace CookingApp.Services
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -1,7 +1,6 @@
 ﻿using System;
 using CookingApp.Models;
 using CookingApp.Services;
-using MongoDB.Bson;
 
 namespace CookingApp
 {
@@ -53,6 +52,33 @@ namespace CookingApp
             }
         }
 
+        static Recipe SelectRecipeByIndex(RecipeService recipeService)
+        {
+            var recipes = recipeService.GetAllRecipes();
+            if (recipes.Count == 0)
+            {
+                Console.WriteLine("Inga recept finns i databasen.");
+                return null;
+            }
+
+            Console.WriteLine("Välj ett recept:");
+            for (int i = 0; i < recipes.Count; i++)
+            {
+                Console.WriteLine($"{i + 1}. {recipes[i].Name}");
+            }
+
+            Console.Write("Ange nummer för receptet: ");
+            if (int.TryParse(Console.ReadLine(), out int index) && index > 0 && index <= recipes.Count)
+            {
+                return recipes[index - 1];
+            }
+            else
+            {
+                Console.WriteLine("Ogiltigt val. Försök igen.");
+                return null;
+            }
+        }
+
         static void AddRecipe(RecipeService recipeService)
         {
             Console.WriteLine("Ange receptets namn:");
@@ -97,115 +123,85 @@ namespace CookingApp
 
         static void RateRecipe(RecipeService recipeService)
         {
-            Console.WriteLine("Ange recept-ID att betygsätta (CustomId):");
-            string recipeId = Console.ReadLine();
-
-            var recipe = recipeService.GetRecipeById(recipeId);
-
-            if (recipe != null)
+            var recipe = SelectRecipeByIndex(recipeService);
+            if (recipe == null)
             {
-                Console.WriteLine("Ange betyg (1-5): ");
-                if (int.TryParse(Console.ReadLine(), out int rating) && rating >= 1 && rating <= 5)
-                {
-                    recipeService.AddRatingToRecipe(recipeId, rating);
-                    Console.WriteLine("Betyg har lagts till.");
-                }
-                else
-                {
-                    Console.WriteLine("Ogiltigt betyg. Betyget måste vara mellan 1 och 5.");
-                }
+                return;
+            }
+
+            Console.WriteLine("Ange betyg (1-5): ");
+            if (int.TryParse(Console.ReadLine(), out int rating) && rating >= 1 && rating <= 5)
+            {
+                recipeService.AddRatingToRecipe(recipe.CustomId, rating);
+                Console.WriteLine("Betyg har lagts till.");
             }
             else
             {
-                Console.WriteLine("Receptet med angivet ID finns inte.");
+                Console.WriteLine("Ogiltigt betyg. Betyget måste vara mellan 1 och 5.");
             }
         }
 
         static void AddComment(RecipeService recipeService)
         {
-            Console.WriteLine("Ange recept-ID att kommentera (CustomId):");
-            string recipeId = Console.ReadLine();
-
-            var recipe = recipeService.GetRecipeById(recipeId);
-
-            if (recipe != null)
+            var recipe = SelectRecipeByIndex(recipeService);
+            if (recipe == null)
             {
-                Console.WriteLine("Skriv din kommentar:");
-                string comment = Console.ReadLine();
-
-                if (string.IsNullOrWhiteSpace(comment))
-                {
-                    Console.WriteLine("Kommentar får inte vara tom.");
-                    return;
-                }
-
-                recipeService.AddCommentToRecipe(recipeId, comment);
-                Console.WriteLine("Kommentar har lagts till.");
+                return;
             }
-            else
+
+            Console.WriteLine("Skriv din kommentar:");
+            string comment = Console.ReadLine();
+
+            if (string.IsNullOrWhiteSpace(comment))
             {
-                Console.WriteLine("Receptet med angivet ID finns inte.");
+                Console.WriteLine("Kommentar får inte vara tom.");
+                return;
             }
+
+            recipeService.AddCommentToRecipe(recipe.CustomId, comment);
+            Console.WriteLine("Kommentar har lagts till.");
         }
 
         static void UpdateRecipe(RecipeService recipeService)
         {
-            Console.WriteLine("Ange recept-ID att uppdatera (CustomId):");
-            string recipeId = Console.ReadLine();
-
-            var recipe = recipeService.GetRecipeById(recipeId);
-
-            if (recipe != null)
+            var recipe = SelectRecipeByIndex(recipeService);
+            if (recipe == null)
             {
-                Console.WriteLine("Ange nytt namn:");
-                string newName = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(newName))
-                {
-                    Console.WriteLine("Namn får inte vara tomt.");
-                    return;
-                }
-
-                Console.WriteLine("Ange ny beskrivning:");
-                string newDescription = Console.ReadLine();
-                if (string.IsNullOrWhiteSpace(newDescription))
-                {
-                    Console.WriteLine("Beskrivning får inte vara tomt.");
-                    return;
-                }
-
-                recipe.Name = newName;
-                recipe.Description = newDescription;
-
-                recipeService.UpdateRecipe(recipeId, recipe);
-                Console.WriteLine("Receptet har uppdaterats.");
+                return;
             }
-            else
+
+            Console.WriteLine("Ange nytt namn:");
+            string newName = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(newName))
             {
-                Console.WriteLine("Receptet med angivet ID finns inte.");
+                Console.WriteLine("Namn får inte vara tomt.");
+                return;
             }
+
+            Console.WriteLine("Ange ny beskrivning:");
+            string newDescription = Console.ReadLine();
+            if (string.IsNullOrWhiteSpace(newDescription))
+            {
+                Console.WriteLine("Beskrivning får inte vara tomt.");
+                return;
+            }
+
+            recipe.Name = newName;
+            recipe.Description = newDescription;
+
+            recipeService.UpdateRecipe(recipe.CustomId, recipe);
+            Console.WriteLine("Receptet har uppdaterats.");
         }
 
         static void DeleteRecipe(RecipeService recipeService)
         {
-            Console.WriteLine("Ange recept-ID att ta bort (CustomId):");
-            string recipeId = Console.ReadLine();
+            var recipe = SelectRecipeByIndex(recipeService);
+            if (recipe == null)
+            {
+                return;
+            }
 
-            recipeService.DeleteRecipe(recipeId);
-            Console.WriteLine("Receptet har tagits bort.");
+            recipeService.DeleteRecipe(recipe.CustomId);
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

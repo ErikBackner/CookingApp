@@ -22,7 +22,7 @@ namespace CookingApp.Database
 
             try
             {
-                client.ListDatabases(); 
+                client.ListDatabases();
             }
             catch (TimeoutException ex)
             {
@@ -41,13 +41,3 @@ namespace CookingApp.Database
         public IMongoCollection<Recipe> Recipes => _database.GetCollection<Recipe>("Recipes");
     }
 }
-
-
-
-
-
-
-
-
-
-

@@ -22,23 +22,7 @@ namespace CookingApp.Models
 
         public Recipe()
         {
-            CustomId = Guid.NewGuid().ToString(); 
+            CustomId = Guid.NewGuid().ToString();
         }
     }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
